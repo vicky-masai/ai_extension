@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reading Simplifier</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 320px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #1c1917; color: #e7e5e4; padding: 20px;
+    }
+    h1 { font-size: 16px; color: #fef9c3; font-weight: 700; letter-spacing: 0.02em; }
+    p { font-size: 12px; color: #a8a29e; margin-top: 6px; line-height: 1.6; }
+    .stat {
+      margin-top: 16px; background: rgba(254,249,195,0.08); border: 1px solid rgba(202,138,4,0.3);
+      border-radius: 10px; padding: 12px 14px;
+    }
+    .stat-label { font-size: 10px; color: #78716c; text-transform: uppercase; }
+    .stat-value { font-size: 22px; font-weight: 700; color: #fbbf24; margin-top: 4px; }
+    .settings { margin-top: 16px; }
+    .setting-row { margin-bottom: 12px; }
+    .setting-row label { display: block; font-size: 11px; color: #a8a29e; margin-bottom: 4px; }
+    .setting-row input[type="range"] { width: 100%; accent-color: #ca8a04; }
+    .setting-row .val { font-size: 11px; color: #fbbf24; }
+    .toggle { display: flex; align-items: center; gap: 8px; }
+    .toggle input { accent-color: #ca8a04; }
+    button {
+      width: 100%; margin-top: 12px; background: #ca8a04; color: #1c1917;
+      border: none; border-radius: 8px; padding: 10px; font-size: 13px;
+      font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    input[type="text"] {
+      width: 100%; margin-top: 10px; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+      padding: 8px 10px; color: #fff; font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Reading Simplifier</h1>
+  <p>Dyslexia-friendly layout + on-device plain English transformation.</p>
+  <div class="stat">
+    <div class="stat-label">Simplifications Left</div>
+    <div class="stat-value" id="remaining">—</div>
+  </div>
+  <div class="settings">
+    <div class="setting-row toggle">
+      <input type="checkbox" id="dyslexia-font" checked />
+      <label for="dyslexia-font">Dyslexia-friendly font</label>
+    </div>
+    <div class="setting-row">
+      <label>Font Size: <span class="val" id="font-size-val">18px</span></label>
+      <input type="range" id="font-size" min="14" max="28" value="18" />
+    </div>
+    <div class="setting-row">
+      <label>Line Spacing: <span class="val" id="line-spacing-val">1.8</span></label>
+      <input type="range" id="line-spacing" min="1.4" max="2.4" step="0.1" value="1.8" />
+    </div>
+  </div>
+  <button id="save-settings">Save & Apply</button>
+  <input type="text" id="pro-key" placeholder="Pro license key" />
+  <script src="popup.js"></script>
+</body>
+</html>

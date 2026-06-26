@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Accessibility Reading Simplifier",
+  "version": "1.0.0",
+  "description": "Dyslexia-friendly reading with on-device plain-English simplification.",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Reading Simplifier"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

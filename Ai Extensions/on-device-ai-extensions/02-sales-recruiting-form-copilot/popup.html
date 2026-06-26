@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Form Copilot</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 380px; max-height: 520px; overflow-y: auto;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a; color: #e2e8f0;
+    }
+    .header { padding: 18px 18px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .header h1 { font-size: 16px; font-weight: 700; color: #fff; }
+    .header p { font-size: 11px; color: #64748b; margin-top: 3px; }
+    .body { padding: 14px 18px 18px; }
+    .profile-card {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 12px; margin-bottom: 10px;
+    }
+    .profile-card h3 { font-size: 13px; color: #fff; margin-bottom: 8px; }
+    .field { margin-bottom: 8px; }
+    .field label { display: block; font-size: 10px; color: #64748b; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .field input, .field textarea {
+      width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px; padding: 7px 9px; color: #fff; font-size: 12px; outline: none;
+    }
+    .field textarea { resize: vertical; min-height: 48px; }
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+    button {
+      flex: 1; padding: 9px; border: none; border-radius: 7px; font-size: 12px;
+      font-weight: 600; cursor: pointer;
+    }
+    .btn-primary { background: #059669; color: #fff; }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+    .btn-danger { background: rgba(239,68,68,0.2); color: #f87171; flex: 0 0 auto; padding: 9px 12px; }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
+    .toolbar button { flex: 1; }
+    .usage { font-size: 11px; color: #64748b; margin-bottom: 10px; }
+    #profiles-list { max-height: 280px; overflow-y: auto; }
+    .empty { font-size: 12px; color: #64748b; text-align: center; padding: 20px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Sales & Recruiting Copilot</h1>
+    <p>On-device AI form mapping · Zero cloud uploads</p>
+  </div>
+  <div class="body">
+    <div class="usage" id="usage">Loading usage…</div>
+    <div class="toolbar">
+      <button class="btn-secondary" id="export-btn">Export Team JSON</button>
+      <button class="btn-secondary" id="import-btn">Import JSON</button>
+      <input type="file" id="import-file" accept=".json" hidden />
+    </div>
+    <div id="profiles-list"></div>
+    <button class="btn-primary" id="add-profile" style="width:100%;margin-top:8px;">+ Add Profile</button>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

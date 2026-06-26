@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>QA Smart Form Filler — Demo Form</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 520px;
+        margin: 40px auto;
+        padding: 0 16px;
+      }
+      label {
+        display: block;
+        margin-top: 12px;
+        font-weight: 600;
+      }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        margin-top: 4px;
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Demo Registration Form</h1>
+    <form id="demo-form">
+      <label for="first-name">First Name</label>
+      <input id="first-name" name="firstName" type="text" placeholder="Jane" required />
+
+      <label for="last-name">Last Name</label>
+      <input id="last-name" name="lastName" type="text" aria-label="Last Name" required />
+
+      <label for="email">Email Address</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" required />
+
+      <label for="phone">Phone Number</label>
+      <input id="phone" name="phone" type="tel" />
+
+      <label for="company">Company</label>
+      <input id="company" name="company" type="text" />
+
+      <label for="role">Role</label>
+      <select id="role" name="role">
+        <option value="">Select a role</option>
+        <option value="qa">QA Engineer</option>
+        <option value="dev">Developer</option>
+        <option value="pm">Product Manager</option>
+      </select>
+
+      <label for="notes">Additional Notes</label>
+      <textarea id="notes" name="notes" rows="4" placeholder="Tell us more"></textarea>
+
+      <p style="margin-top: 16px">
+        <label><input type="checkbox" name="subscribe" /> Subscribe to updates</label>
+      </p>
+
+      <p>
+        <label><input type="radio" name="plan" value="free" /> Free plan</label>
+        <label><input type="radio" name="plan" value="pro" /> Pro plan</label>
+      </p>
+    </form>
+  </body>
+</html>

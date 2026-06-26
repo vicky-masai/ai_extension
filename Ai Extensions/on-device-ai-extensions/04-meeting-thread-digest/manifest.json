@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Meeting Thread Digest",
+  "version": "1.0.0",
+  "description": "Executive summaries from Slack and Gmail threads — 100% on-device.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "https://app.slack.com/*",
+    "https://*.slack.com/*",
+    "https://mail.google.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Thread Digest"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://app.slack.com/*",
+        "https://*.slack.com/*",
+        "https://mail.google.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

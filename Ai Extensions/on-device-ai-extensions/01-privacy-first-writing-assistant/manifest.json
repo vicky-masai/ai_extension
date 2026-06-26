@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Privacy-First Writing Assistant",
+  "version": "1.0.0",
+  "description": "Grammarly alternative with zero cloud data leakage. On-device tone, grammar, and length fixes.",
+  "permissions": ["storage", "contextMenus", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://mail.google.com/*",
+    "https://www.linkedin.com/*",
+    "https://www.notion.so/*",
+    "https://*.atlassian.net/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Writing Assistant"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.google.com/*",
+        "https://www.linkedin.com/*",
+        "https://www.notion.so/*",
+        "https://*.atlassian.net/*"
+      ],
+      "js": ["content.js"],
+      "css": [],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QA Smart Form Filler</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #0f1419;
+        --surface: #1a2332;
+        --surface-hover: #243044;
+        --border: #2d3a4f;
+        --text: #e8edf5;
+        --muted: #8b9cb3;
+        --accent: #3b82f6;
+        --accent-hover: #2563eb;
+        --success-bg: #0d3320;
+        --success-border: #166534;
+        --success-text: #86efac;
+        --error-bg: #3f1515;
+        --error-border: #991b1b;
+        --error-text: #fca5a5;
+        --warn-bg: #3f2e0a;
+        --warn-border: #a16207;
+        --warn-text: #fde68a;
+      }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f4f7fb;
+          --surface: #ffffff;
+          --surface-hover: #eef2f8;
+          --border: #d8e0ec;
+          --text: #0f172a;
+          --muted: #64748b;
+          --success-bg: #ecfdf5;
+          --success-border: #86efac;
+          --success-text: #166534;
+          --error-bg: #fef2f2;
+          --error-border: #fca5a5;
+          --error-text: #991b1b;
+          --warn-bg: #fffbeb;
+          --warn-border: #fde68a;
+          --warn-text: #92400e;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        width: 320px;
+        min-height: 220px;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        font-size: 13px;
+        line-height: 1.45;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .container {
+        padding: 16px;
+        min-height: 220px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      header {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      header h1 {
+        font-size: 15px;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+      }
+
+      header p {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .ai-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+
+      .ai-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--muted);
+        flex-shrink: 0;
+      }
+
+      .ai-dot.ready {
+        background: #22c55e;
+      }
+
+      .ai-dot.downloading {
+        background: #f59e0b;
+      }
+
+      .ai-dot.unavailable {
+        background: #ef4444;
+      }
+
+      #autofill-btn {
+        width: 100%;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--accent);
+        color: #fff;
+        transition: background 0.15s ease, opacity 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      #autofill-btn:hover:not(:disabled) {
+        background: var(--accent-hover);
+      }
+
+      #autofill-btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        display: none;
+      }
+
+      #autofill-btn.loading .spinner {
+        display: block;
+      }
+
+      #autofill-btn.loading .btn-label {
+        opacity: 0.9;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      #status-banner {
+        display: none;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        border: 1px solid var(--border);
+        word-break: break-word;
+      }
+
+      #status-banner.visible {
+        display: block;
+      }
+
+      #status-banner.success {
+        background: var(--success-bg);
+        border-color: var(--success-border);
+        color: var(--success-text);
+      }
+
+      #status-banner.error {
+        background: var(--error-bg);
+        border-color: var(--error-border);
+        color: var(--error-text);
+      }
+
+      #status-banner.warning {
+        background: var(--warn-bg);
+        border-color: var(--warn-border);
+        color: var(--warn-text);
+      }
+
+      footer {
+        margin-top: auto;
+        padding-top: 10px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .footer-credit {
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .footer-credit a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .footer-credit a:hover {
+        text-decoration: underline;
+      }
+
+      .footer-powered {
+        font-size: 10px;
+        color: var(--muted);
+        opacity: 0.85;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>QA Smart Form Filler</h1>
+        <p>Scan forms and inject context-aware test data with Gemini Nano.</p>
+        <div class="ai-badge" id="ai-status">
+          <span class="ai-dot" id="ai-dot"></span>
+          <span id="ai-status-text">Checking AI availability…</span>
+        </div>
+      </header>
+
+      <button type="button" id="autofill-btn" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="btn-label">Auto-Fill Form</span>
+      </button>
+
+      <div id="status-banner" role="status" aria-live="polite"></div>
+
+      <footer>
+        <p class="footer-credit">
+          Developed by
+          <a
+            href="https://www.linkedin.com/in/vicky-paswan/"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Vicky Paswan on LinkedIn"
+          >Vicky Paswan</a>
+        </p>
+        <p class="footer-powered">Powered by Chrome Built-in AI (Prompt API)</p>
+      </footer>
+    </div>
+
+    <script src="lib/ai-engine.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

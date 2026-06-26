@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thread Digest</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 320px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(160deg, #1e1b4b, #0f172a); color: #e2e8f0; padding: 20px;
+    }
+    h1 { font-size: 16px; color: #fff; font-weight: 700; }
+    p { font-size: 12px; color: #94a3b8; margin-top: 6px; line-height: 1.5; }
+    .stat {
+      margin-top: 16px; background: rgba(255,255,255,0.06); border-radius: 10px;
+      padding: 12px 14px; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .stat-label { font-size: 10px; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; }
+    .stat-value { font-size: 22px; font-weight: 700; color: #a78bfa; margin-top: 4px; }
+    .platforms { margin-top: 16px; }
+    .platforms li {
+      font-size: 12px; color: #cbd5e1; list-style: none; padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .platforms li::before { content: '✓ '; color: #8b5cf6; }
+    label { display: block; font-size: 10px; color: #64748b; margin-top: 14px; }
+    input {
+      width: 100%; margin-top: 4px; background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 6px;
+      padding: 8px 10px; color: #fff; font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Meeting Thread Digest</h1>
+  <p>Click "Digest Thread" in Slack or Gmail to generate executive summaries on-device.</p>
+  <div class="stat">
+    <div class="stat-label">Digests Remaining</div>
+    <div class="stat-value" id="remaining">—</div>
+  </div>
+  <ul class="platforms">
+    <li>Slack Web — channel & thread messages</li>
+    <li>Gmail — email conversation threads</li>
+  </ul>
+  <label for="pro-key">Pro License Key</label>
+  <input type="text" id="pro-key" placeholder="Unlimited digests" />
+  <script src="popup.js"></script>
+</body>
+</html>

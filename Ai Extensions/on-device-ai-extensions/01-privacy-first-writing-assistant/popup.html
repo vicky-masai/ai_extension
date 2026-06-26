@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writing Assistant</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 340px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 100%);
+      color: #e2e8f0;
+      padding: 0;
+    }
+    .header {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .header h1 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+    .header p {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(79, 70, 229, 0.3);
+      color: #a5b4fc;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-top: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .body { padding: 16px 20px 20px; }
+    .stat-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .stat-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat-value { font-size: 28px; font-weight: 700; color: #fff; margin-top: 4px; }
+    .stat-value span { font-size: 14px; font-weight: 400; color: #64748b; }
+    .pro-banner {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .pro-banner h3 { font-size: 13px; font-weight: 600; color: #fff; }
+    .pro-banner p { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 4px; }
+    label { font-size: 11px; color: #94a3b8; display: block; margin-bottom: 6px; }
+    input[type="text"] {
+      width: 100%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+    input[type="text"]:focus { border-color: #6366f1; }
+    button {
+      width: 100%;
+      margin-top: 10px;
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: #4338ca; }
+    .tips { margin-top: 14px; }
+    .tips h4 { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .tips li { font-size: 12px; color: #94a3b8; margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .tips li::before { content: '→'; position: absolute; left: 0; color: #6366f1; }
+    .status-msg { font-size: 12px; color: #34d399; margin-top: 8px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Privacy-First Writing</h1>
+    <p>100% on-device · Zero cloud leakage</p>
+    <span class="badge" id="plan-badge">Free Plan</span>
+  </div>
+  <div class="body">
+    <div class="stat-card">
+      <div class="stat-label">Fixes Remaining Today</div>
+      <div class="stat-value" id="remaining">—<span> / 20</span></div>
+    </div>
+    <div class="pro-banner" id="upgrade-banner">
+      <h3>Upgrade to Pro</h3>
+      <p>Unlimited on-device fixes. Your data never leaves your machine.</p>
+    </div>
+    <label for="pro-key">Pro License Key</label>
+    <input type="text" id="pro-key" placeholder="Enter your Pro key" autocomplete="off" />
+    <button id="save-key">Activate Pro</button>
+    <p class="status-msg" id="status-msg">Pro activated!</p>
+    <div class="tips">
+      <h4>How to use</h4>
+      <ul>
+        <li>Select text in Gmail, LinkedIn, Notion, or Jira</li>
+        <li>Right-click → choose a writing action</li>
+        <li>AI rewrites locally via Chrome built-in models</li>
+      </ul>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
