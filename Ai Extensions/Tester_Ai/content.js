@@ -204,20 +204,107 @@
   }
 
   /**
+   * @param {unknown} rawValue
+   * @returns {string}
+   */
+  function coerceToString(rawValue) {
+    if (rawValue == null) {
+      return '';
+    }
+    if (typeof rawValue === 'object') {
+      const obj = /** @type {Record<string, unknown>} */ (rawValue);
+      if (obj.value != null) {
+        return String(obj.value).trim();
+      }
+      if (obj.text != null) {
+        return String(obj.text).trim();
+      }
+    }
+    return String(rawValue).trim();
+  }
+
+  /**
+   * @param {HTMLSelectElement} select
+   * @param {unknown} rawValue
+   * @returns {HTMLOptionElement | null}
+   */
+  function findSelectOption(select, rawValue) {
+    const target = coerceToString(rawValue);
+    const options = Array.from(select.options).filter((option) => !option.disabled);
+    const pool = options.length > 0 ? options : Array.from(select.options);
+
+    const exactValue = pool.find((option) => option.value === target);
+    if (exactValue) {
+      return exactValue;
+    }
+
+    const lowerTarget = target.toLowerCase();
+    const caseValue = pool.find((option) => option.value.toLowerCase() === lowerTarget);
+    if (caseValue) {
+      return caseValue;
+    }
+
+    const exactText = pool.find((option) => option.text.trim() === target);
+    if (exactText) {
+      return exactText;
+    }
+
+    const caseText = pool.find((option) => option.text.trim().toLowerCase() === lowerTarget);
+    if (caseText) {
+      return caseText;
+    }
+
+    return pool.find((option) => option.value !== '') ?? pool[0] ?? null;
+  }
+
+  /**
+   * @param {HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement} element
+   * @param {string} value
+   */
+  function setNativeValue(element, value) {
+    const prototype =
+      element instanceof HTMLSelectElement
+        ? HTMLSelectElement.prototype
+        : element instanceof HTMLTextAreaElement
+          ? HTMLTextAreaElement.prototype
+          : HTMLInputElement.prototype;
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, 'value');
+
+    if (descriptor?.set) {
+      descriptor.set.call(element, value);
+      return;
+    }
+
+    element.value = value;
+  }
+
+  /**
+   * @param {HTMLSelectElement} select
+   * @param {unknown} value
+   */
+  function injectSelectValue(select, value) {
+    const option = findSelectOption(select, value);
+    if (!option) {
+      return;
+    }
+
+    Array.from(select.options).forEach((opt) => {
+      opt.selected = opt === option;
+    });
+
+    select.selectedIndex = option.index;
+    setNativeValue(select, option.value);
+    dispatchInputEvents(select);
+  }
+
+  /**
    * @param {Element} element
    * @param {unknown} value
    */
   function injectValue(element, value) {
     if (element instanceof HTMLSelectElement) {
-      const stringValue = String(value ?? '');
-      const match = Array.from(element.options).find(
-        (option) => option.value === stringValue || option.text === stringValue,
-      );
-      if (match) {
-        element.value = match.value;
-      } else if (element.options.length > 0) {
-        element.selectedIndex = 0;
-      }
+      injectSelectValue(element, value);
+      return;
     } else if (element instanceof HTMLInputElement) {
       if (element.type === 'checkbox') {
         element.checked = Boolean(value);
@@ -234,10 +321,10 @@
         });
         return;
       } else {
-        element.value = String(value ?? '');
+        setNativeValue(element, String(value ?? ''));
       }
     } else if (element instanceof HTMLTextAreaElement) {
-      element.value = String(value ?? '');
+      setNativeValue(element, String(value ?? ''));
     } else {
       return;
     }
@@ -249,7 +336,15 @@
    * @param {Element} element
    */
   function dispatchInputEvents(element) {
-    for (const eventType of ['input', 'change', 'blur']) {
+    element.dispatchEvent(
+      new InputEvent('input', {
+        bubbles: true,
+        cancelable: true,
+        inputType: 'insertReplacementText',
+      }),
+    );
+
+    for (const eventType of ['change', 'blur']) {
       element.dispatchEvent(new Event(eventType, { bubbles: true, cancelable: true }));
     }
   }
@@ -333,6 +428,8 @@
               totalFields: scraped.length,
               source: generation.source,
               warning: generation.warning,
+              errorCode: generation.errorCode,
+              errorSeverity: generation.errorSeverity,
             };
           }
 

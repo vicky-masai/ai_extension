@@ -28,6 +28,181 @@
 
   const AI_TIMEOUT_MS = 45000;
 
+  /** @typedef {'RATE_LIMIT' | 'QUOTA_EXCEEDED' | 'INVALID_API_KEY' | 'MODEL_UNAVAILABLE' | 'NETWORK_ERROR' | 'TIMEOUT' | 'BAD_RESPONSE' | 'SERVER_ERROR' | 'UNKNOWN'} AIErrorCode */
+
+  /**
+   * @param {number} status
+   * @param {Record<string, unknown>} errBody
+   * @param {Error | null} err
+   * @returns {{ code: AIErrorCode, message: string, severity: 'error' | 'warning' }}
+   */
+  function classifyGeminiError(status, errBody, err) {
+    const apiMessage = String(
+      /** @type {{ error?: { message?: string, status?: string } }} */ (errBody)?.error?.message ||
+        err?.message ||
+        '',
+    );
+    const apiStatus = String(
+      /** @type {{ error?: { status?: string } }} */ (errBody)?.error?.status || '',
+    );
+    const lower = apiMessage.toLowerCase();
+
+    if (err?.name === 'AbortError') {
+      return {
+        code: 'TIMEOUT',
+        message: 'Gemini API request timed out. Try again in a moment.',
+        severity: 'warning',
+      };
+    }
+
+    if (
+      err instanceof TypeError ||
+      /failed to fetch|networkerror|network request failed/i.test(lower)
+    ) {
+      return {
+        code: 'NETWORK_ERROR',
+        message: 'Could not reach Gemini API. Check your internet connection.',
+        severity: 'error',
+      };
+    }
+
+    if (status === 429 || apiStatus === 'RESOURCE_EXHAUSTED' || /rate.?limit|too many requests/i.test(lower)) {
+      return {
+        code: 'RATE_LIMIT',
+        message: 'Gemini API rate limit reached. Wait a minute, then try again.',
+        severity: 'error',
+      };
+    }
+
+    if (/quota|billing|exceeded your current quota/i.test(lower)) {
+      return {
+        code: 'QUOTA_EXCEEDED',
+        message: 'Gemini API quota exceeded. Check your plan in Google AI Studio.',
+        severity: 'error',
+      };
+    }
+
+    if (
+      status === 401 ||
+      status === 403 ||
+      apiStatus === 'PERMISSION_DENIED' ||
+      /api.?key|invalid.*key|unauthorized/i.test(lower)
+    ) {
+      return {
+        code: 'INVALID_API_KEY',
+        message: 'Invalid or unauthorized Gemini API key. Update your key in the popup.',
+        severity: 'error',
+      };
+    }
+
+    if (status === 404 || apiStatus === 'NOT_FOUND' || /model.*not found/i.test(lower)) {
+      return {
+        code: 'MODEL_UNAVAILABLE',
+        message: `Gemini model "${GEMINI_MODEL}" is unavailable. Try again later.`,
+        severity: 'error',
+      };
+    }
+
+    if (status >= 500) {
+      return {
+        code: 'SERVER_ERROR',
+        message: 'Gemini API is temporarily unavailable. Try again shortly.',
+        severity: 'warning',
+      };
+    }
+
+    return {
+      code: 'UNKNOWN',
+      message: apiMessage || `Gemini API error (${status || 'unknown'}).`,
+      severity: 'warning',
+    };
+  }
+
+  /**
+   * @param {unknown} rawValue
+   * @returns {string}
+   */
+  function coerceToString(rawValue) {
+    if (rawValue == null) {
+      return '';
+    }
+    if (typeof rawValue === 'object') {
+      const obj = /** @type {Record<string, unknown>} */ (rawValue);
+      if (obj.value != null) {
+        return String(obj.value).trim();
+      }
+      if (obj.text != null) {
+        return String(obj.text).trim();
+      }
+    }
+    return String(rawValue).trim();
+  }
+
+  /**
+   * @param {Array<{ value?: string, text?: string, disabled?: boolean }>} options
+   * @param {unknown} rawValue
+   * @returns {string | undefined}
+   */
+  function resolveSelectOptionValue(options, rawValue) {
+    if (!Array.isArray(options) || options.length === 0) {
+      return undefined;
+    }
+
+    const target = coerceToString(rawValue);
+    const enabled = options.filter((opt) => !opt.disabled);
+    const pool = enabled.length > 0 ? enabled : options;
+
+    const exactValue = pool.find((opt) => opt.value === target);
+    if (exactValue) {
+      return exactValue.value;
+    }
+
+    const lowerTarget = target.toLowerCase();
+    const caseValue = pool.find((opt) => String(opt.value || '').toLowerCase() === lowerTarget);
+    if (caseValue) {
+      return caseValue.value;
+    }
+
+    const exactText = pool.find((opt) => String(opt.text || '').trim() === target);
+    if (exactText) {
+      return exactText.value;
+    }
+
+    const caseText = pool.find(
+      (opt) => String(opt.text || '').trim().toLowerCase() === lowerTarget,
+    );
+    if (caseText) {
+      return caseText.value;
+    }
+
+    const fallback = pool.find((opt) => opt.value !== '') ?? pool[0];
+    return fallback?.value;
+  }
+
+  /**
+   * @param {Record<string, unknown>[]} fields
+   * @param {Record<string, unknown>} data
+   * @returns {Record<string, unknown>}
+   */
+  function normalizeGeneratedData(fields, data) {
+    const normalized = { ...data };
+
+    for (const field of fields) {
+      if (!Object.prototype.hasOwnProperty.call(normalized, field.key)) {
+        continue;
+      }
+
+      if (field.tag === 'select' && Array.isArray(field.options)) {
+        const resolved = resolveSelectOptionValue(field.options, normalized[field.key]);
+        if (resolved != null) {
+          normalized[field.key] = resolved;
+        }
+      }
+    }
+
+    return normalized;
+  }
+
   /**
    * @returns {Promise<string>}
    */
@@ -237,7 +412,7 @@
 
   /**
    * @param {Record<string, unknown>[]} fields
-   * @returns {Promise<{ data: Record<string, unknown>, source: 'ai' | 'fallback', warning?: string }>}
+   * @returns {Promise<{ data: Record<string, unknown>, source: 'ai' | 'fallback', warning?: string, errorCode?: AIErrorCode, errorSeverity?: 'error' | 'warning' }>}
    */
   async function generateTestDataWithAI(fields) {
     const capabilities = await checkAICapabilities();
@@ -247,6 +422,8 @@
         data: generateFallbackData(fields),
         source: 'fallback',
         warning: capabilities.message || 'AI unavailable. Used generic fallback data.',
+        errorCode: 'INVALID_API_KEY',
+        errorSeverity: 'error',
       };
     }
 
@@ -287,6 +464,8 @@
           data: generateFallbackData(fields),
           source: 'fallback',
           warning: 'AI returned malformed JSON. Used generic fallback data.',
+          errorCode: 'BAD_RESPONSE',
+          errorSeverity: 'warning',
         };
       }
 
@@ -302,6 +481,8 @@
           data: generateFallbackData(fields),
           source: 'fallback',
           warning: 'AI response did not match any field keys. Used generic fallback data.',
+          errorCode: 'BAD_RESPONSE',
+          errorSeverity: 'warning',
         };
       }
 
@@ -312,15 +493,25 @@
         }
       }
 
-      return { data: normalized, source: 'ai' };
+      return {
+        data: normalizeGeneratedData(fields, normalized),
+        source: 'ai',
+      };
     } catch (err) {
-      const isAbort = err?.name === 'AbortError';
+      const error = err instanceof Error ? err : new Error(String(err));
+      const errorRecord = /** @type {Record<string, unknown>} */ (error);
+      const classified = classifyGeminiError(
+        Number(errorRecord.status) || 0,
+        /** @type {Record<string, unknown>} */ (errorRecord.body) || {},
+        error,
+      );
+
       return {
         data: generateFallbackData(fields),
         source: 'fallback',
-        warning: isAbort
-          ? 'AI request timed out. Used generic fallback data.'
-          : `AI error: ${err?.message || 'Unknown error'}. Used generic fallback data.`,
+        warning: `${classified.message} Used generic fallback data.`,
+        errorCode: classified.code,
+        errorSeverity: classified.severity,
       };
     }
   }
@@ -363,16 +554,21 @@
 
       if (!response.ok) {
         const errBody = await response.json().catch(() => ({}));
-        const errMsg =
-          errBody?.error?.message || `Gemini API request failed (${response.status}).`;
-        throw new Error(errMsg);
+        const classified = classifyGeminiError(response.status, errBody, null);
+        const apiError = new Error(classified.message);
+        apiError.name = 'GeminiAPIError';
+        /** @type {Record<string, unknown>} */ (apiError).status = response.status;
+        /** @type {Record<string, unknown>} */ (apiError).body = errBody;
+        throw apiError;
       }
 
       const data = await response.json();
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!text) {
-        throw new Error('Gemini API returned an empty response.');
+        const emptyError = new Error('Gemini API returned an empty response.');
+        emptyError.name = 'GeminiAPIError';
+        throw emptyError;
       }
 
       return typeof text === 'string' ? text : String(text);

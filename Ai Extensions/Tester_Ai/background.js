@@ -90,7 +90,7 @@ function generateFallbackData(fields) {
  */
 async function generateTestData(tabId, fields) {
   try {
-    const response = /** @type {{ ok: boolean, data?: Record<string, unknown>, source?: string, warning?: string, error?: string }} */ (
+    const response = /** @type {{ ok: boolean, data?: Record<string, unknown>, source?: string, warning?: string, errorCode?: string, errorSeverity?: string, error?: string }} */ (
       await sendTabMessage(tabId, {
         type: 'GENERATE_TEST_DATA',
         fields,
@@ -102,6 +102,8 @@ async function generateTestData(tabId, fields) {
         data: response.data,
         source: response.source || 'ai',
         warning: response.warning,
+        errorCode: response.errorCode,
+        errorSeverity: response.errorSeverity,
       };
     }
 
@@ -155,6 +157,8 @@ async function runAutofillPipeline(tabId) {
     totalFields: injectResponse.totalFields ?? fields.length,
     source: generation.source,
     warning: generation.warning,
+    errorCode: generation.errorCode,
+    errorSeverity: generation.errorSeverity,
   };
 }
 

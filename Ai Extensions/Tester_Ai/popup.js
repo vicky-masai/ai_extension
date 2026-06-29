@@ -142,6 +142,8 @@ async function handleAutofill() {
       totalFields?: number,
       source?: string,
       warning?: string,
+      errorCode?: string,
+      errorSeverity?: 'error' | 'warning',
       error?: string,
       code?: string
     }} */ (
@@ -166,7 +168,12 @@ async function handleAutofill() {
     const successMsg = `Filled ${response.filledCount ?? 0} of ${response.totalFields ?? 0} fields (${sourceLabel}).`;
 
     if (response.warning) {
-      showStatus('warning', `${successMsg} ${response.warning}`);
+      const isCritical =
+        response.errorSeverity === 'error' ||
+        ['RATE_LIMIT', 'QUOTA_EXCEEDED', 'INVALID_API_KEY', 'NETWORK_ERROR', 'MODEL_UNAVAILABLE'].includes(
+          response.errorCode || '',
+        );
+      showStatus(isCritical ? 'error' : 'warning', `${successMsg} ${response.warning}`);
     } else {
       showStatus('success', successMsg);
     }
