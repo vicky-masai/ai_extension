@@ -227,18 +227,81 @@
         color: var(--muted);
         opacity: 0.85;
       }
+
+      .api-key-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .api-key-section label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .api-key-row {
+        display: flex;
+        gap: 6px;
+      }
+
+      #api-key-input {
+        flex: 1;
+        min-width: 0;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 12px;
+        background: var(--surface);
+        color: var(--text);
+      }
+
+      #api-key-input:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+      }
+
+      #save-api-key-btn {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--surface);
+        color: var(--text);
+        white-space: nowrap;
+      }
+
+      #save-api-key-btn:hover {
+        background: var(--surface-hover);
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <header>
         <h1>QA Smart Form Filler</h1>
-        <p>Scan forms and inject context-aware test data with Gemini Nano.</p>
+        <p>Scan forms and inject context-aware test data with Gemini Flash-Lite.</p>
         <div class="ai-badge" id="ai-status">
           <span class="ai-dot" id="ai-dot"></span>
           <span id="ai-status-text">Checking AI availability…</span>
         </div>
       </header>
+
+      <div class="api-key-section">
+        <label for="api-key-input">Gemini API key</label>
+        <div class="api-key-row">
+          <input
+            type="password"
+            id="api-key-input"
+            placeholder="AIza…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button type="button" id="save-api-key-btn">Save</button>
+        </div>
+      </div>
 
       <button type="button" id="autofill-btn" aria-live="polite">
         <span class="spinner" aria-hidden="true"></span>
@@ -257,7 +320,7 @@
             title="Vicky Paswan on LinkedIn"
           >Vicky Paswan</a>
         </p>
-        <p class="footer-powered">Powered by Chrome Built-in AI (Prompt API)</p>
+        <p class="footer-powered">Powered by Gemini API (Flash-Lite)</p>
       </footer>
     </div>
 

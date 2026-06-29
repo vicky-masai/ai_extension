@@ -7,6 +7,8 @@ const autofillBtn = document.getElementById('autofill-btn');
 const statusBanner = document.getElementById('status-banner');
 const aiDot = document.getElementById('ai-dot');
 const aiStatusText = document.getElementById('ai-status-text');
+const apiKeyInput = document.getElementById('api-key-input');
+const saveApiKeyBtn = document.getElementById('save-api-key-btn');
 
 /**
  * @param {'success' | 'error' | 'warning'} type
@@ -63,7 +65,9 @@ function renderAICapabilities(capabilities) {
   switch (capabilities?.status) {
     case 'readily':
       aiDot.classList.add('ready');
-      aiStatusText.textContent = 'Gemini Nano ready';
+      aiStatusText.textContent = globalThis.QASmartAI?.GEMINI_MODEL
+        ? `${globalThis.QASmartAI.GEMINI_MODEL} ready`
+        : 'Gemini API ready';
       break;
     case 'after-download':
       aiDot.classList.add('downloading');
@@ -173,5 +177,30 @@ async function handleAutofill() {
   }
 }
 
+async function loadApiKey() {
+  if (!globalThis.QASmartAI || !apiKeyInput) {
+    return;
+  }
+
+  const key = await globalThis.QASmartAI.getApiKey();
+  if (key) {
+    apiKeyInput.value = key;
+  }
+}
+
+async function handleSaveApiKey() {
+  if (!globalThis.QASmartAI || !apiKeyInput) {
+    return;
+  }
+
+  await globalThis.QASmartAI.setApiKey(apiKeyInput.value.trim());
+  await refreshAICapabilities();
+  showStatus('success', 'API key saved.');
+}
+
 autofillBtn.addEventListener('click', handleAutofill);
-document.addEventListener('DOMContentLoaded', refreshAICapabilities);
+saveApiKeyBtn?.addEventListener('click', handleSaveApiKey);
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadApiKey();
+  await refreshAICapabilities();
+});
